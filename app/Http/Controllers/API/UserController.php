@@ -32,4 +32,21 @@ class UserController extends Controller
             'user' => $user
         ], 201);
     }
+
+    public function login(Request $request){
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|string|email',
+            'password' =>'required|string|min:6'
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json($validator->errors());
+        }
+
+        if( !$token = auth()->attempt($validator->Validator())){
+            return response()->json(['success'=>false,'msg'=>'Username & Password is incorrect']);
+        }
+    }
+
 }
