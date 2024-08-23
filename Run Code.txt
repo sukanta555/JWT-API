@@ -1,0 +1,34 @@
+Step-1:
+    composer create-project laravel/laravel:^10.0 example-app
+
+Step-2:
+    composer require tymon/jwt-auth
+ OR-
+    composer require tymon/jwt-auth --ignore-platform-reqs
+
+Step-3: Add this line:
+ D:\xampp_8v\htdocs\jwt_api\config\app.php : -
+    Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+
+Step-4:
+   Run this code:
+    php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"  
+
+Step-5:
+ php artisan jwt:secret
+
+Step-6: 
+    Step Method code this section model.
+     D:\xampp_8v\htdocs\jwt_api\app\Models\User.php
+
+Step-7: 
+    Replace guard web section:
+    D:\xampp_8v\htdocs\jwt_api\config\auth.php
+
+Step-8:
+    php artisan make:controller API\UserController
+
+
+Postman:-
+1>http://127.0.0.1:8000/api/register
+2>
