@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class UserController extends Controller
 {
@@ -27,26 +30,53 @@ class UserController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
-        return response()->json([
-            'msg' => 'User Inserted Successfully',
-            'user' => $user
-        ], 201);
+        $token = auth()->login($user);
+
+        return $this->respondWithToken($token, 'User Registered Successfully');
     }
 
-    public function login(Request $request){
-        $validator = Validator::make($request->all(),[
-            'email' => 'required|string|email',
-            'password' =>'required|string|min:6'
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (!$token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $this->respondWithToken($token, 'Login Successful');
+    }
+
+    protected function respondWithToken($token, $message)
+    {
+        return response()->json([
+            'message' => $message,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ]);
+    }
 
-        if($validator->fails())
-        {
-            return response()->json($validator->errors());
+    public function me()
+    {
+        return response()->json(auth()->user());
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function refresh()
+    {
+        try {
+            $newToken = JWTAuth::parseToken()->refresh();  // Alternative using JWTAuth facade
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Could not refresh token'], 401);
         }
 
-        if( !$token = auth()->attempt($validator->Validator())){
-            return response()->json(['success'=>false,'msg'=>'Username & Password is incorrect']);
-        }
+        return $this->respondWithToken($newToken, 'Token Refreshed');
     }
 
 }
