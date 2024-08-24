@@ -35,7 +35,7 @@ class UserController extends Controller
         return $this->respondWithToken($token, 'User Registered Successfully');
     }
 
-    public function login(Request $request)
+    /*public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
 
@@ -50,6 +50,25 @@ class UserController extends Controller
     {
         return response()->json([
             'message' => $message,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+        ]);
+    }*/
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (!$token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $this->respondWithToken($token);
+    }
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
